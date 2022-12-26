@@ -10,7 +10,7 @@ void HookEvents()
 public Action Event_RoundEnd(Event event, const char[] name, bool dontBroadcast)
 {
 	if (g_GZ_Rank_NumPlayers < g_GZ_Rank_MinPlayers || GameRules_GetProp("m_bWarmupPeriod") == 1)
-		return;
+		return Plugin_Handled;
 	
 	int winner = GetEventInt(event, "winner");
 
@@ -33,12 +33,13 @@ public Action Event_RoundEnd(Event event, const char[] name, bool dontBroadcast)
 			
 		CheckRanks();
 	}
+	return Plugin_Handled;
 }
 
 public Action Event_BombPlanted(Handle event, const char[] name, bool dontBroadcast)
 {
 	if (g_GZ_Rank_NumPlayers < g_GZ_Rank_MinPlayers)
-		return;
+		return Plugin_Handled;
 	
 	int playerplantedbomb = GetClientOfUserId(GetEventInt(event, "userid"));
 
@@ -61,12 +62,13 @@ public Action Event_BombPlanted(Handle event, const char[] name, bool dontBroadc
 			CheckRanks();
 		}
 	}
+	return Plugin_Handled;
 }
 
 public Action Event_BombDefused(Handle event, const char[] name, bool dontBroadcast)
 {
 	if (g_GZ_Rank_NumPlayers < g_GZ_Rank_MinPlayers)
-		return;
+		return Plugin_Handled;
 	
 	int playerdefusedbomb = GetClientOfUserId(GetEventInt(event, "userid"));
 	for (int i = 1; i <= MaxClients; i++)
@@ -88,12 +90,13 @@ public Action Event_BombDefused(Handle event, const char[] name, bool dontBroadc
 			CheckRanks();
 		}
 	}
+	return Plugin_Handled;
 }
 
 public Action Event_PlayerDeath(Handle event, const char[] name, bool dontBroadcast)
 {
 	if (g_GZ_Rank_NumPlayers < g_GZ_Rank_MinPlayers || GameRules_GetProp("m_bWarmupPeriod") == 1)
-		return;
+		return Plugin_Handled;
 	
 	int victim = GetClientOfUserId(GetEventInt(event, "userid"));
 	int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
@@ -104,15 +107,15 @@ public Action Event_PlayerDeath(Handle event, const char[] name, bool dontBroadc
 	ReplaceString(weapon, sizeof(weapon), "weapon_", "");
 	
 	if (!IsValidClient(victim) || !IsValidClient(attacker))
-		return;
+		return Plugin_Handled;
 	
 	if ((victim == attacker) && (PlayerData[victim].Season.Points >= g_GZ_Rank_Suicide_Points))
 	{			
-		PlayerData[victim].Season.Points -= g_GZ_Rank_Suicide_Points;
-		PlayerData[victim].Global.Points -= g_GZ_Rank_Suicide_Points;
-		PlayerData[victim].Season.Deaths++;
-		PlayerData[victim].Global.Deaths++;
-		CPrintToChat(victim, "[ {orange}RANK{default} ] Perdeste {lightred}%i{default} pontos por te suicidares.", g_GZ_Rank_Suicide_Points);
+	 	PlayerData[victim].Season.Points -= g_GZ_Rank_Suicide_Points;
+	 	PlayerData[victim].Global.Points -= g_GZ_Rank_Suicide_Points;
+	 	PlayerData[victim].Season.Deaths++;
+	 	PlayerData[victim].Global.Deaths++;
+	 	CPrintToChat(victim, "[ {orange}RANK{default} ] Perdeste {lightred}%i{default} pontos por te suicidares.", g_GZ_Rank_Suicide_Points);
 	}
 	else if (victim != attacker) {
 		bool headshot = GetEventBool(event, "headshot");
@@ -186,6 +189,7 @@ public Action Event_PlayerDeath(Handle event, const char[] name, bool dontBroadc
 	}
 
 	CheckRanks();
+	return Plugin_Handled;
 }
 
 public Action Event_RoundMvp(Handle event, const char[] name, bool dontBroadcast)
@@ -193,7 +197,7 @@ public Action Event_RoundMvp(Handle event, const char[] name, bool dontBroadcast
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
 	
 	if (!IsClientInGame(client) || (g_GZ_Rank_NumPlayers < g_GZ_Rank_MinPlayers) || GameRules_GetProp("m_bWarmupPeriod") == 1)
-		return;
+		return Plugin_Handled;
 	
 	PlayerData[client].Season.Points += g_GZ_Rank_Mvp_Points;
 	PlayerData[client].Global.Points += g_GZ_Rank_Mvp_Points;
@@ -203,4 +207,6 @@ public Action Event_RoundMvp(Handle event, const char[] name, bool dontBroadcast
 
 	CPrintToChat(client, "[ {orange}RANK{default} ] Ganhaste {green}%i{default} pontos por seres o MVP.", g_GZ_Rank_Mvp_Points);
 	CheckRanks();
+
+	return Plugin_Handled;
 } 
